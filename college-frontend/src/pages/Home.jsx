@@ -23,55 +23,35 @@ const Home = () => {
   const [notifications, setNotifications] = useState([]);
   const [featuredGallery, setFeaturedGallery] = useState([]);
 
-  // Mock data - in real app, this would come from API
   useEffect(() => {
-    // Mock notifications
-    const unsortedNotifications = [
-      {
-        id: 1,
-        title: 'Admission Open for Session 2024-25',
-        category: 'admission',
-        priority: 'high',
-        created_at: '2024-01-15T10:00:00Z'
-      },
-      {
-        id: 2,
-        title: 'Semester Examination Schedule Released',
-        category: 'exam',
-        priority: 'normal',
-        created_at: '2024-01-14T14:30:00Z'
-      },
-      {
-        id: 3,
-        title: 'Annual Cultural Function - 2024',
-        category: 'event',
-        priority: 'normal',
-        created_at: '2024-01-13T09:15:00Z'
+    const fetchNotifications = async () => {
+      try {
+        const response = await fetch('/api/notifications');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setNotifications(data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
       }
-    ];
-    setNotifications(unsortedNotifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+    };
 
-    // Mock gallery items
-    setFeaturedGallery([
-      {
-        id: 1,
-        title: 'College Campus',
-        image_url: 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=300&fit=crop',
-        category: 'infrastructure'
-      },
-      {
-        id: 2,
-        title: 'Annual Function 2023',
-        image_url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=300&fit=crop',
-        category: 'events'
-      },
-      {
-        id: 3,
-        title: 'Library',
-        image_url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop',
-        category: 'infrastructure'
+    const fetchGalleryItems = async () => {
+      try {
+        const response = await fetch('/api/gallery');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setFeaturedGallery(data);
+      } catch (error) {
+        console.error("Error fetching gallery items:", error);
       }
-    ]);
+    };
+
+    fetchNotifications();
+    fetchGalleryItems();
   }, []);
 
   const quickAccessItems = [

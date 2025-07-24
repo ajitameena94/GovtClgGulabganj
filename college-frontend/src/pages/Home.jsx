@@ -26,7 +26,7 @@ const Home = () => {
   // Mock data - in real app, this would come from API
   useEffect(() => {
     // Mock notifications
-    setNotifications([
+    const unsortedNotifications = [
       {
         id: 1,
         title: 'Admission Open for Session 2024-25',
@@ -48,7 +48,8 @@ const Home = () => {
         priority: 'normal',
         created_at: '2024-01-13T09:15:00Z'
       }
-    ]);
+    ];
+    setNotifications(unsortedNotifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
 
     // Mock gallery items
     setFeaturedGallery([
@@ -184,6 +185,50 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Latest Notifications */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Latest Notifications</h2>
+              <Link to="/notifications">
+                <Button variant="outline" size="sm">
+                  View All
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+            <div className="space-y-4">
+              {notifications.map((notification) => (
+                <Card key={notification.id} className="card-hover">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Badge
+                            variant={notification.priority === 'high' ? 'destructive' : 'secondary'}
+                            className="text-xs"
+                          >
+                            {notification.category}
+                          </Badge>
+                          <span className="text-xs text-gray-500">
+                            {new Date(notification.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <h3 className="font-semibold text-gray-900 mb-1">
+                          {notification.title}
+                        </h3>
+                      </div>
+                      <Bell className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Quick Access Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -276,52 +321,10 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Latest Notifications */}
+      {/* Featured Gallery */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Notifications */}
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Latest Notifications</h2>
-                <Link to="/notifications">
-                  <Button variant="outline" size="sm">
-                    View All
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-              
-              <div className="space-y-4">
-                {notifications.map((notification) => (
-                  <Card key={notification.id} className="card-hover">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge 
-                              variant={notification.priority === 'high' ? 'destructive' : 'secondary'}
-                              className="text-xs"
-                            >
-                              {notification.category}
-                            </Badge>
-                            <span className="text-xs text-gray-500">
-                              {new Date(notification.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <h3 className="font-semibold text-gray-900 mb-1">
-                            {notification.title}
-                          </h3>
-                        </div>
-                        <Bell className="h-5 w-5 text-gray-400 flex-shrink-0" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-
-            {/* Featured Gallery */}
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Campus Gallery</h2>

@@ -15,7 +15,7 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await login(username, password, () => {
-      navigate('/admin/upload-facilities');
+      navigate('/admin');
     });
   };
 

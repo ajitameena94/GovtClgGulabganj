@@ -3,6 +3,11 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
+import UploadFacilities from './pages/UploadFacilities';
+import UploadGallery from './pages/UploadGallery';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 // Placeholder components for other pages
@@ -16,7 +21,6 @@ const Contact = () => <div className="min-h-screen py-20 px-4"><div className="c
 const Notifications = () => <div className="min-h-screen py-20 px-4"><div className="container mx-auto"><h1 className="text-4xl font-bold text-center">Notifications</h1><p className="text-center mt-4 text-gray-600">Notifications page coming soon...</p></div></div>;
 const Timetable = () => <div className="min-h-screen py-20 px-4"><div className="container mx-auto"><h1 className="text-4xl font-bold text-center">Timetable</h1><p className="text-center mt-4 text-gray-600">Timetable page coming soon...</p></div></div>;
 const StudentPortal = () => <div className="min-h-screen py-20 px-4"><div className="container mx-auto"><h1 className="text-4xl font-bold text-center">Student Portal</h1><p className="text-center mt-4 text-gray-600">Student Portal coming soon...</p></div></div>;
-const Admin = () => <div className="min-h-screen py-20 px-4"><div className="container mx-auto"><h1 className="text-4xl font-bold text-center">Admin Login</h1><p className="text-center mt-4 text-gray-600">Admin panel coming soon...</p></div></div>;
 
 function App() {
   return (
@@ -39,7 +43,31 @@ function App() {
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/timetable" element={<Timetable />} />
             <Route path="/student-portal" element={<StudentPortal />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route 
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/admin/upload-facilities"
+              element={
+                <ProtectedRoute>
+                  <UploadFacilities />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/admin/upload/gallery"
+              element={
+                <ProtectedRoute>
+                  <UploadGallery />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/privacy-policy" element={<About />} />
             <Route path="/terms-conditions" element={<About />} />
             <Route path="/sitemap" element={<About />} />

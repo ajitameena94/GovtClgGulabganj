@@ -9,10 +9,12 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import collegeLogo from '../assets/college_logo.png';
+import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { admin } = useAuth();
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -75,9 +77,15 @@ const Header = () => {
               <Link to="/student-portal" className="hover:text-secondary transition-colors">
                 Student Portal
               </Link>
-              <Link to="/admin" className="hover:text-secondary transition-colors">
-                Admin Login
-              </Link>
+              {admin ? (
+                <Link to="/admin" className="hover:text-secondary transition-colors">
+                  Admin Dashboard
+                </Link>
+              ) : (
+                <Link to="/admin/login" className="hover:text-secondary transition-colors">
+                  Admin Login
+                </Link>
+              )}
             </div>
           </div>
         </div>

@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
           setAdmin(data.admin);
           setError(null);
-          window.location.href = '/admin/upload-facilities'; // Redirect on success
+          window.location.href = '/GovtClgGulabganj/admin/upload-facilities'; // Redirect on success
         } else {
         setError(data.error || 'Login failed');
       }

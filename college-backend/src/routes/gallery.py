@@ -9,9 +9,6 @@ from ..database.database import SessionLocal, engine, Base
 
 gallery_bp = Blueprint('gallery', __name__)
 
-# Create tables if they don't exist
-Base.metadata.create_all(bind=engine)
-
 def get_db():
     db = SessionLocal()
     try:

@@ -9,9 +9,6 @@ from ..database.database import SessionLocal, engine, Base
 
 facilities_bp = Blueprint('facilities', __name__)
 
-# Create tables if they don't exist
-Base.metadata.create_all(bind=engine)
-
 def get_db():
     db = SessionLocal()
     try:

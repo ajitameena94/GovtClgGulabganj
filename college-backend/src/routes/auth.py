@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from src.models.college import Admin, db
 from functools import wraps
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, JWTManager
+from werkzeug.exceptions import BadRequest
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -20,26 +21,29 @@ def login_required(f):
 def login():
     try:
         data = request.get_json()
-        username = data.get('username')
-        password = data.get('password')
-        
-        if not username or not password:
-            return jsonify({'error': 'Username and password are required'}), 400
-        
-        admin = Admin.query.filter_by(username=username).first()
-        
-        if admin and admin.check_password(password):
-            access_token = create_access_token(identity=admin.id)
-            return jsonify({
-                'message': 'Login successful',
-                'access_token': access_token,
-                'admin': admin.to_dict()
-            }), 200
-        else:
-            return jsonify({'error': 'Invalid username or password'}), 401
-            
+    except BadRequest as e:
+        return jsonify({'error': f'Invalid JSON in request: {e.description}'}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+    username = data.get('username')
+    password = data.get('password')
+    
+    if not username or not password:
+        return jsonify({'error': 'Username and password are required'}), 400
+    
+    admin = Admin.query.filter_by(username=username).first()
+    
+    if admin and admin.check_password(password):
+        access_token = create_access_token(identity=admin.id)
+        return jsonify({
+            'message': 'Login successful',
+            'access_token': access_token,
+            'admin': admin.to_dict()
+        }), 200
+    else:
+        return jsonify({'error': 'Invalid username or password'}), 401
+            
 
 @auth_bp.route('/logout', methods=['POST'])
 @jwt_required()

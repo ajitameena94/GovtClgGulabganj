@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { admin } = useAuth();
+  const { admin, logout } = useAuth();
 
   const navigation = [
     { name: 'Home', href: '/' },

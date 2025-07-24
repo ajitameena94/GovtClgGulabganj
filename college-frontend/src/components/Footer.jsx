@@ -7,30 +7,15 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const quickLinks = [
-    { name: 'About College', href: '/about' },
+    { name: 'About', href: '/about' },
+    { name: 'Academics', href: '/academics' },
     { name: 'Admissions', href: '/admissions' },
-    { name: 'Academic Programs', href: '/academics/programs' },
     { name: 'Faculty', href: '/faculty' },
     { name: 'Results', href: '/results' },
-    { name: 'Gallery', href: '/gallery' }
-  ];
-
-  const academicLinks = [
-    { name: 'BA History', href: '/academics/programs/history' },
-    { name: 'BA Economics', href: '/academics/programs/economics' },
-    { name: 'BA Sociology', href: '/academics/programs/sociology' },
-    { name: 'BA Political Science', href: '/academics/programs/political-science' },
-    { name: 'BA Hindi Literature', href: '/academics/programs/hindi-literature' },
-    { name: 'BA English Literature', href: '/academics/programs/english-literature' }
-  ];
-
-  const importantLinks = [
+    { name: 'Gallery', href: '/gallery' },
+    { name: 'Contact', href: '/contact' },
     { name: 'Notifications', href: '/notifications' },
     { name: 'Timetable', href: '/timetable' },
-    { name: 'Student Portal', href: '/student-portal' },
-    { name: 'Examination', href: '/academics/examination' },
-    { name: 'Syllabus', href: '/academics/syllabus' },
-    { name: 'Contact Us', href: '/contact' }
   ];
 
   return (
@@ -88,23 +73,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Academic Programs */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Academic Programs</h3>
-            <ul className="space-y-2">
-              {academicLinks.map((link) => (
-                <li key={link.name}>
-                  <Link 
-                    to={link.href} 
-                    className="text-sm opacity-90 hover:opacity-100 hover:text-secondary transition-all"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           {/* Contact Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Contact Information</h3>
@@ -141,23 +109,6 @@ const Footer = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Important Links Bar */}
-      <div className="border-t border-white/20">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-wrap justify-center gap-4 md:gap-8">
-            {importantLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.href}
-                className="text-sm opacity-90 hover:opacity-100 hover:text-secondary transition-all"
-              >
-                {link.name}
-              </Link>
-            ))}
           </div>
         </div>
       </div>

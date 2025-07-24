@@ -185,45 +185,80 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Latest Notifications */}
+      {/* Latest Notifications & Gallery */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Latest Notifications</h2>
-              <Link to="/notifications">
-                <Button variant="outline" size="sm">
-                  View All
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-            <div className="space-y-4">
-              {notifications.map((notification) => (
-                <Card key={notification.id} className="card-hover">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <Badge
-                            variant={notification.priority === 'high' ? 'destructive' : 'secondary'}
-                            className="text-xs"
-                          >
-                            {notification.category}
-                          </Badge>
-                          <span className="text-xs text-gray-500">
-                            {new Date(notification.created_at).toLocaleDateString()}
-                          </span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Notifications */}
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Latest Notifications</h2>
+                <Link to="/notifications">
+                  <Button variant="outline" size="sm">
+                    View All
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+              
+              <div className="space-y-4">
+                {notifications.map((notification) => (
+                  <Card key={notification.id} className="card-hover">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Badge 
+                              variant={notification.priority === 'high' ? 'destructive' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {notification.category}
+                            </Badge>
+                            <span className="text-xs text-gray-500">
+                              {new Date(notification.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <h3 className="font-semibold text-gray-900 mb-1">
+                            {notification.title}
+                          </h3>
                         </div>
-                        <h3 className="font-semibold text-gray-900 mb-1">
-                          {notification.title}
-                        </h3>
+                        <Bell className="h-5 w-5 text-gray-400 flex-shrink-0" />
                       </div>
-                      <Bell className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Featured Gallery */}
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Campus Gallery</h2>
+                <Link to="/gallery">
+                  <Button variant="outline" size="sm">
+                    View All
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {featuredGallery.map((item) => (
+                  <div key={item.id} className="relative group overflow-hidden rounded-lg">
+                    <img 
+                      src={item.image_url} 
+                      alt={item.title}
+                      className="w-full h-48 object-cover transition-transform group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute bottom-4 left-4 text-white">
+                        <h3 className="font-semibold">{item.title}</h3>
+                        <p className="text-sm opacity-90">{item.category}</p>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -250,23 +285,6 @@ const Home = () => {
                   </CardContent>
                 </Card>
               </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* College Stats */}
-      <section className="py-16 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {collegeStats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="flex justify-center mb-4">
-                  <stat.icon className="h-12 w-12 text-secondary" />
-                </div>
-                <div className="text-3xl font-bold mb-2">{stat.value}</div>
-                <div className="text-sm opacity-90">{stat.label}</div>
-              </div>
             ))}
           </div>
         </div>
@@ -321,43 +339,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Gallery */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Campus Gallery</h2>
-                <Link to="/gallery">
-                  <Button variant="outline" size="sm">
-                    View All
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {featuredGallery.map((item) => (
-                  <div key={item.id} className="relative group overflow-hidden rounded-lg">
-                    <img 
-                      src={item.image_url} 
-                      alt={item.title}
-                      className="w-full h-48 object-cover transition-transform group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-4 left-4 text-white">
-                        <h3 className="font-semibold">{item.title}</h3>
-                        <p className="text-sm opacity-90">{item.category}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* About Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
@@ -392,20 +373,16 @@ const Home = () => {
             </div>
             
             <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop" 
-                alt="College Building"
+               <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3660.832295965443!2d77.9133564149757!3d23.61019258474883!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39792b1b7e8d8b1b%3A0x4f0d6a29e8d8b1b!2sGovt.%20College%20Gulabganj!5e0!3m2!1sen!2sin!4v1678886425628!5m2!1sen!2sin"
+                width="600" 
+                height="450" 
+                style={{ border: 0 }} 
+                allowFullScreen="" 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
                 className="rounded-lg shadow-lg w-full"
-              />
-              <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-lg shadow-lg">
-                <div className="flex items-center space-x-3">
-                  <MapPin className="h-8 w-8 text-primary" />
-                  <div>
-                    <p className="font-semibold text-gray-900">Located in</p>
-                    <p className="text-gray-600">Gulabganj, Vidisha</p>
-                  </div>
-                </div>
-              </div>
+              ></iframe>
             </div>
           </div>
         </div>

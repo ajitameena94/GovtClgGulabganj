@@ -42,9 +42,14 @@ const Header = () => {
             </div>
             <div className="flex items-center space-x-4">
               {admin ? (
-                <Link to="/admin" className="hover:text-secondary transition-colors">
-                  Admin Dashboard
-                </Link>
+                <>
+                  <Link to="/admin" className="hover:text-secondary transition-colors">
+                    Admin Dashboard
+                  </Link>
+                  <Button variant="ghost" size="sm" onClick={logout} className="hover:text-secondary transition-colors">
+                    Logout
+                  </Button>
+                </>
               ) : (
                 <Link to="/admin/login" className="hover:text-secondary transition-colors">
                   Admin Login

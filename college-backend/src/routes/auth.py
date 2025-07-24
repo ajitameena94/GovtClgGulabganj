@@ -1,14 +1,18 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify
 from src.models.college import Admin, db
 from functools import wraps
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, JWTManager
 
 auth_bp = Blueprint('auth', __name__)
 
+# This is a placeholder for your JWTManager initialization
+# It should be initialized in your main app.py file
+# jwt = JWTManager(app) 
+
 def login_required(f):
     @wraps(f)
+    @jwt_required()
     def decorated_function(*args, **kwargs):
-        if 'admin_id' not in session:
-            return jsonify({'error': 'Authentication required'}), 401
         return f(*args, **kwargs)
     return decorated_function
 
@@ -25,10 +29,10 @@ def login():
         admin = Admin.query.filter_by(username=username).first()
         
         if admin and admin.check_password(password):
-            session['admin_id'] = admin.id
-            session['admin_username'] = admin.username
+            access_token = create_access_token(identity=admin.id)
             return jsonify({
                 'message': 'Login successful',
+                'access_token': access_token,
                 'admin': admin.to_dict()
             }), 200
         else:
@@ -38,19 +42,21 @@ def login():
         return jsonify({'error': str(e)}), 500
 
 @auth_bp.route('/logout', methods=['POST'])
+@jwt_required()
 def logout():
-    session.clear()
+    # Token is revoked on client side by deleting it from localStorage
     return jsonify({'message': 'Logout successful'}), 200
 
 @auth_bp.route('/check-auth', methods=['GET'])
+@jwt_required()
 def check_auth():
-    if 'admin_id' in session:
-        admin = Admin.query.get(session['admin_id'])
-        if admin:
-            return jsonify({
-                'authenticated': True,
-                'admin': admin.to_dict()
-            }), 200
+    current_admin_id = get_jwt_identity()
+    admin = Admin.query.get(current_admin_id)
+    if admin:
+        return jsonify({
+            'authenticated': True,
+            'admin': admin.to_dict()
+        }), 200
     
     return jsonify({'authenticated': False}), 200
 

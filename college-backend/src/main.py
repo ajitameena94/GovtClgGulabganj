@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 from src.models.user import db
 from src.models.college import Admin
 from src.routes.user import user_bp
@@ -20,6 +21,8 @@ from src.routes.facilities import facilities_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
+app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this in production!
+jwt = JWTManager(app)
 
 # Enable CORS for all routes
 CORS(app, origins=["http://localhost:5173", "https://ajitameena94.github.io"], supports_credentials=True)

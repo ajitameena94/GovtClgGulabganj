@@ -1,4 +1,5 @@
 import os
+import os
 import sys
 # DON'T CHANGE THIS !!!
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -33,7 +34,7 @@ app.register_blueprint(notifications_bp, url_prefix='/api')
 app.register_blueprint(gallery_bp, url_prefix='/api')
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://college_db_aib3_user:lNs5Olyvg9o7RmQM1vGJ9lpQvNak4B4o@dpg-d20rk7mmcj7s73e38g40-a/college_db_aib3')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 

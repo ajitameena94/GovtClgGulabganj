@@ -1,22 +1,17 @@
 from flask import Blueprint, request, jsonify
-from sqlalchemy.orm import Session
 from datetime import datetime
 
 from ..models.notification import Notification
-from ..database.database import SessionLocal, engine, Base
+from ..models.user import db
 
 notifications_bp = Blueprint('notifications', __name__)
 
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    return db.session
 
 @notifications_bp.route("/notifications", methods=["POST"])
 def create_notification():
-    db = next(get_db())
+    session = get_db()
     data = request.get_json()
     title = data.get('title')
     content = data.get('content')
@@ -25,9 +20,9 @@ def create_notification():
         return jsonify({"message": "Title and content are required"}), 400
 
     db_notification = Notification(title=title, content=content, created_at=datetime.utcnow())
-    db.add(db_notification)
-    db.commit()
-    db.refresh(db_notification)
+    session.add(db_notification)
+    session.commit()
+    session.refresh(db_notification)
     return jsonify({
         "id": db_notification.id,
         "title": db_notification.title,
@@ -37,8 +32,8 @@ def create_notification():
 
 @notifications_bp.route("/notifications", methods=["GET"])
 def read_notifications():
-    db = next(get_db())
-    notifications = db.query(Notification).order_by(Notification.created_at.desc()).all()
+    session = get_db()
+    notifications = session.query(Notification).order_by(Notification.created_at.desc()).all()
     return jsonify([
         {
             "id": notification.id,
@@ -50,8 +45,8 @@ def read_notifications():
 
 @notifications_bp.route("/notifications/<int:notification_id>", methods=["GET"])
 def read_notification(notification_id: int):
-    db = next(get_db())
-    notification = db.query(Notification).filter(Notification.id == notification_id).first()
+    session = get_db()
+    notification = session.query(Notification).filter(Notification.id == notification_id).first()
     if notification is None:
         return jsonify({"message": "Notification not found"}), 404
     return jsonify({
@@ -63,8 +58,8 @@ def read_notification(notification_id: int):
 
 @notifications_bp.route("/notifications/<int:notification_id>", methods=["PUT"])
 def update_notification(notification_id: int):
-    db = next(get_db())
-    db_notification = db.query(Notification).filter(Notification.id == notification_id).first()
+    session = get_db()
+    db_notification = session.query(Notification).filter(Notification.id == notification_id).first()
     if db_notification is None:
         return jsonify({"message": "Notification not found"}), 404
     
@@ -72,8 +67,8 @@ def update_notification(notification_id: int):
     db_notification.title = data.get('title', db_notification.title)
     db_notification.content = data.get('content', db_notification.content)
     
-    db.commit()
-    db.refresh(db_notification)
+    session.commit()
+    session.refresh(db_notification)
     return jsonify({
         "id": db_notification.id,
         "title": db_notification.title,
@@ -83,10 +78,10 @@ def update_notification(notification_id: int):
 
 @notifications_bp.route("/notifications/<int:notification_id>", methods=["DELETE"])
 def delete_notification(notification_id: int):
-    db = next(get_db())
-    db_notification = db.query(Notification).filter(Notification.id == notification_id).first()
+    session = get_db()
+    db_notification = session.query(Notification).filter(Notification.id == notification_id).first()
     if db_notification is None:
         return jsonify({"message": "Notification not found"}), 404
-    db.delete(db_notification)
-    db.commit()
+    session.delete(db_notification)
+    session.commit()
     return jsonify({"message": "Notification deleted successfully"}), 200

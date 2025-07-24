@@ -1,26 +1,21 @@
 from flask import Blueprint, request, jsonify, current_app
-from sqlalchemy.orm import Session
 from datetime import datetime
 import os
 import uuid
 
 from ..models.facility import Facility
-from ..database.database import SessionLocal, engine, Base
+from ..models.user import db
 
 facilities_bp = Blueprint('facilities', __name__)
 
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    return db.session
 
 UPLOAD_FOLDER = 'src/static/uploads/facilities'
 
 @facilities_bp.route("/facilities", methods=["POST"])
 def create_facility():
-    db = next(get_db())
+    session = get_db()
     name = request.form.get('name')
     description = request.form.get('description')
     file = request.files.get('file')
@@ -41,9 +36,9 @@ def create_facility():
         return jsonify({"message": "File not provided"}), 400
 
     db_facility = Facility(name=name, description=description, image_url=image_url, uploaded_at=datetime.utcnow())
-    db.add(db_facility)
-    db.commit()
-    db.refresh(db_facility)
+    session.add(db_facility)
+    session.commit()
+    session.refresh(db_facility)
     return jsonify({
         "id": db_facility.id,
         "name": db_facility.name,
@@ -54,8 +49,8 @@ def create_facility():
 
 @facilities_bp.route("/facilities", methods=["GET"])
 def read_facilities():
-    db = next(get_db())
-    facilities = db.query(Facility).order_by(Facility.uploaded_at.desc()).all()
+    session = get_db()
+    facilities = session.query(Facility).order_by(Facility.uploaded_at.desc()).all()
     return jsonify([
         {
             "id": facility.id,
@@ -68,8 +63,8 @@ def read_facilities():
 
 @facilities_bp.route("/facilities/<int:facility_id>", methods=["GET"])
 def read_facility(facility_id: int):
-    db = next(get_db())
-    facility = db.query(Facility).filter(Facility.id == facility_id).first()
+    session = get_db()
+    facility = session.query(Facility).filter(Facility.id == facility_id).first()
     if facility is None:
         return jsonify({"message": "Facility not found"}), 404
     return jsonify({
@@ -82,8 +77,8 @@ def read_facility(facility_id: int):
 
 @facilities_bp.route("/facilities/<int:facility_id>", methods=["PUT"])
 def update_facility(facility_id: int):
-    db = next(get_db())
-    db_facility = db.query(Facility).filter(Facility.id == facility_id).first()
+    session = get_db()
+    db_facility = session.query(Facility).filter(Facility.id == facility_id).first()
     if db_facility is None:
         return jsonify({"message": "Facility not found"}), 404
     
@@ -106,8 +101,8 @@ def update_facility(facility_id: int):
         file.save(file_location)
         db_facility.image_url = f"/static/uploads/facilities/{filename}"
 
-    db.commit()
-    db.refresh(db_facility)
+    session.commit()
+    session.refresh(db_facility)
     return jsonify({
         "id": db_facility.id,
         "name": db_facility.name,
@@ -118,8 +113,8 @@ def update_facility(facility_id: int):
 
 @facilities_bp.route("/facilities/<int:facility_id>", methods=["DELETE"])
 def delete_facility(facility_id: int):
-    db = next(get_db())
-    db_facility = db.query(Facility).filter(Facility.id == facility_id).first()
+    session = get_db()
+    db_facility = session.query(Facility).filter(Facility.id == facility_id).first()
     if db_facility is None:
         return jsonify({"message": "Facility not found"}), 404
     
@@ -127,6 +122,6 @@ def delete_facility(facility_id: int):
     if db_facility.image_url and os.path.exists(os.path.join(current_app.root_path, db_facility.image_url.lstrip('/'))):
         os.remove(os.path.join(current_app.root_path, db_facility.image_url.lstrip('/')))
 
-    db.delete(db_facility)
-    db.commit()
+    session.delete(db_facility)
+    session.commit()
     return jsonify({"message": "Facility deleted successfully"}), 200

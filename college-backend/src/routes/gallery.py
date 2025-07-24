@@ -1,26 +1,21 @@
 from flask import Blueprint, request, jsonify, current_app
-from sqlalchemy.orm import Session
 from datetime import datetime
 import os
 import uuid
 
 from ..models.gallery import GalleryItem
-from ..database.database import SessionLocal, engine, Base
+from ..models.user import db
 
 gallery_bp = Blueprint('gallery', __name__)
 
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    return db.session
 
 UPLOAD_FOLDER = 'src/static/uploads/gallery'
 
 @gallery_bp.route("/gallery", methods=["POST"])
 def create_gallery_item():
-    db = next(get_db())
+    session = get_db()
     title = request.form.get('title')
     category = request.form.get('category')
     file = request.files.get('file')
@@ -41,9 +36,9 @@ def create_gallery_item():
         return jsonify({"message": "File not provided"}), 400
 
     db_gallery_item = GalleryItem(title=title, category=category, image_url=image_url, uploaded_at=datetime.utcnow())
-    db.add(db_gallery_item)
-    db.commit()
-    db.refresh(db_gallery_item)
+    session.add(db_gallery_item)
+    session.commit()
+    session.refresh(db_gallery_item)
     return jsonify({
         "id": db_gallery_item.id,
         "title": db_gallery_item.title,
@@ -54,8 +49,8 @@ def create_gallery_item():
 
 @gallery_bp.route("/gallery", methods=["GET"])
 def read_gallery_items():
-    db = next(get_db())
-    gallery_items = db.query(GalleryItem).order_by(GalleryItem.uploaded_at.desc()).all()
+    session = get_db()
+    gallery_items = session.query(GalleryItem).order_by(GalleryItem.uploaded_at.desc()).all()
     return jsonify([
         {
             "id": item.id,
@@ -68,8 +63,8 @@ def read_gallery_items():
 
 @gallery_bp.route("/gallery/<int:gallery_item_id>", methods=["GET"])
 def read_gallery_item(gallery_item_id: int):
-    db = next(get_db())
-    item = db.query(GalleryItem).filter(GalleryItem.id == gallery_item_id).first()
+    session = get_db()
+    item = session.query(GalleryItem).filter(GalleryItem.id == gallery_item_id).first()
     if item is None:
         return jsonify({"message": "Gallery item not found"}), 404
     return jsonify({
@@ -82,8 +77,8 @@ def read_gallery_item(gallery_item_id: int):
 
 @gallery_bp.route("/gallery/<int:gallery_item_id>", methods=["PUT"])
 def update_gallery_item(gallery_item_id: int):
-    db = next(get_db())
-    db_gallery_item = db.query(GalleryItem).filter(GalleryItem.id == gallery_item_id).first()
+    session = get_db()
+    db_gallery_item = session.query(GalleryItem).filter(GalleryItem.id == gallery_item_id).first()
     if db_gallery_item is None:
         return jsonify({"message": "Gallery item not found"}), 404
     
@@ -106,8 +101,8 @@ def update_gallery_item(gallery_item_id: int):
         file.save(file_location)
         db_gallery_item.image_url = f"/static/uploads/gallery/{filename}"
 
-    db.commit()
-    db.refresh(db_gallery_item)
+    session.commit()
+    session.refresh(db_gallery_item)
     return jsonify({
         "id": db_gallery_item.id,
         "title": db_gallery_item.title,
@@ -118,8 +113,8 @@ def update_gallery_item(gallery_item_id: int):
 
 @gallery_bp.route("/gallery/<int:gallery_item_id>", methods=["DELETE"])
 def delete_gallery_item(gallery_item_id: int):
-    db = next(get_db())
-    db_gallery_item = db.query(GalleryItem).filter(GalleryItem.id == gallery_item_id).first()
+    session = get_db()
+    db_gallery_item = session.query(GalleryItem).filter(GalleryItem.id == gallery_item_id).first()
     if db_gallery_item is None:
         return jsonify({"message": "Gallery item not found"}), 404
     
@@ -127,6 +122,6 @@ def delete_gallery_item(gallery_item_id: int):
     if db_gallery_item.image_url and os.path.exists(os.path.join(current_app.root_path, db_gallery_item.image_url.lstrip('/'))):
         os.remove(os.path.join(current_app.root_path, db_gallery_item.image_url.lstrip('/')))
 
-    db.delete(db_gallery_item)
-    db.commit()
+    session.delete(db_gallery_item)
+    session.commit()
     return jsonify({"message": "Gallery item deleted successfully"}), 200

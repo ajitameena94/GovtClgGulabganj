@@ -22,7 +22,7 @@ const AdminDashboard = () => {
       title: 'Manage Gallery',
       description: 'View, edit, and delete campus gallery images.',
       icon: Image,
-      link: '/admin/manage-gallery',
+      link: '/admin/upload/gallery',
     },
   ];
 

@@ -35,6 +35,10 @@ app.register_blueprint(notifications_bp, url_prefix='/api')
 app.register_blueprint(gallery_bp, url_prefix='/api')
 app.register_blueprint(facilities_bp, url_prefix='/api')
 
+@app.route("/api/test_post", methods=["POST"])
+def test_post():
+    return jsonify({"message": "Test POST successful!", "data": request.get_json()}), 200
+
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://college_db_aib3_user:lNs5Olyvg9o7RmQM1vGJ9lpQvNak4B4o@dpg-d20rk7mmcj7s73e38g40-a/college_db_aib3')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

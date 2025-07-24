@@ -31,8 +31,11 @@ const ManageFacilities = () => {
   const handleDelete = async (id) => {
     console.log('Delete facility:', id);
     try {
-      const response = await fetch(`/api/facilities/${id}`, {
+      const response = await fetch(`https://college-backend-api.onrender.com/api/facilities/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

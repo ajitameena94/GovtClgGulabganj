@@ -15,9 +15,22 @@ const ManageTimetables = () => {
     // In a real application, you would navigate to an edit page or open a modal
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     console.log('Delete timetable:', id);
-    setTimetables(timetables.filter(timetable => timetable.id !== id));
+    try {
+      const response = await fetch(`https://college-backend-api.onrender.com/api/timetables/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      setTimetables(timetables.filter(timetable => timetable.id !== id));
+    } catch (error) {
+      console.error("Error deleting timetable:", error);
+    }
   };
 
   return (

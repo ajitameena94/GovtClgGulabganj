@@ -33,6 +33,9 @@ const ManageGallery = () => {
     try {
       const response = await fetch(`https://college-backend-api.onrender.com/api/gallery/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

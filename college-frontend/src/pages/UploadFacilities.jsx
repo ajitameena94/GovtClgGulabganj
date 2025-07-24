@@ -21,6 +21,9 @@ const UploadFacilities = () => {
     try {
       const response = await fetch('https://college-backend-api.onrender.com/api/facilities', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
         body: formData,
       });
 

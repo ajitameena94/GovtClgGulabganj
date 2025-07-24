@@ -8,7 +8,7 @@ const ManageGallery = () => {
 
   const fetchGalleryItems = async () => {
     try {
-      const response = await fetch('/api/gallery');
+      const response = await fetch('https://college-backend-api.onrender.com/api/gallery');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -31,7 +31,7 @@ const ManageGallery = () => {
   const handleDelete = async (id) => {
     console.log('Delete gallery item:', id);
     try {
-      const response = await fetch(`/api/gallery/${id}`, {
+      const response = await fetch(`https://college-backend-api.onrender.com/api/gallery/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

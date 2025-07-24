@@ -26,7 +26,7 @@ const Home = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await fetch('/api/notifications');
+        const response = await fetch('https://college-backend-api.onrender.com/api/notifications');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -39,7 +39,7 @@ const Home = () => {
 
     const fetchGalleryItems = async () => {
       try {
-        const response = await fetch('/api/gallery');
+        const response = await fetch('https://college-backend-api.onrender.com/api/gallery');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

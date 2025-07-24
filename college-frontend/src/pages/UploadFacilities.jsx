@@ -19,7 +19,7 @@ const UploadFacilities = () => {
     formData.append('file', facilityImage);
 
     try {
-      const response = await fetch('/api/facilities', {
+      const response = await fetch('https://college-backend-api.onrender.com/api/facilities', {
         method: 'POST',
         body: formData,
       });

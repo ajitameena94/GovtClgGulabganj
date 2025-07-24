@@ -10,7 +10,7 @@ const ManageNotifications = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('/api/notifications');
+      const response = await fetch('https://college-backend-api.onrender.com/api/notifications');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -28,7 +28,7 @@ const ManageNotifications = () => {
   const handleAddNotification = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/notifications', {
+      const response = await fetch('https://college-backend-api.onrender.com/api/notifications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ const ManageNotifications = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`/api/notifications/${id}`, {
+      const response = await fetch(`https://college-backend-api.onrender.com/api/notifications/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

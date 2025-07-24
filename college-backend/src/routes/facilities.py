@@ -14,6 +14,7 @@ def get_db():
 UPLOAD_FOLDER = 'src/static/uploads/facilities'
 
 @facilities_bp.route("/facilities", methods=["POST"])
+# @login_required # Add your authentication decorator here
 def create_facility():
     session = get_db()
     name = request.form.get('name')

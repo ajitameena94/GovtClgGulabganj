@@ -7,12 +7,6 @@ import { Book, Bell, CalendarDays, Image, Upload } from 'lucide-react';
 const AdminDashboard = () => {
   const adminActions = [
     {
-      title: 'Manage Campus Library',
-      description: 'Upload and delete library resources.',
-      icon: Book,
-      link: '/admin/manage-library',
-    },
-    {
       title: 'Manage Notifications',
       description: 'Create, edit, and delete college notifications.',
       icon: Bell,
@@ -23,12 +17,6 @@ const AdminDashboard = () => {
       description: 'Upload and manage class timetables.',
       icon: CalendarDays,
       link: '/admin/manage-timetables',
-    },
-    {
-      title: 'Manage Facilities',
-      description: 'Upload, edit, and delete college facilities.',
-      icon: Upload,
-      link: '/admin/manage-facilities',
     },
     {
       title: 'Upload Gallery',

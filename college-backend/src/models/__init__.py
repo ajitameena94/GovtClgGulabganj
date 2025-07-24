@@ -3,3 +3,4 @@ from .college import Admin
 from .notification import Notification
 from .gallery import GalleryItem
 from .facility import Facility
+from .timetable import Timetable

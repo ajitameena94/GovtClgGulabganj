@@ -14,6 +14,7 @@ def get_db():
 UPLOAD_FOLDER = 'src/static/uploads/gallery'
 
 @gallery_bp.route("/gallery", methods=["POST"])
+# @login_required # Add your authentication decorator here
 def create_gallery_item():
     session = get_db()
     title = request.form.get('title')

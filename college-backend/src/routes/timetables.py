@@ -1,284 +1,121 @@
-from flask import Blueprint, request, jsonify
-from src.models.college import Timetable, Faculty, db
-from src.routes.auth import login_required
+from flask import Blueprint, request, jsonify, current_app
+from datetime import datetime
+import os
+import uuid
+
+from ..models.timetable import Timetable
+from ..models.user import db
 
 timetables_bp = Blueprint('timetables', __name__)
 
-@timetables_bp.route('/timetables', methods=['GET'])
-def get_timetables():
-    try:
-        program = request.args.get('program')
-        semester = request.args.get('semester', type=int)
-        day_of_week = request.args.get('day_of_week')
-        
-        query = Timetable.query.filter_by(is_active=True)
-        
-        if program:
-            query = query.filter(Timetable.program.contains(program))
-        if semester:
-            query = query.filter_by(semester=semester)
-        if day_of_week:
-            query = query.filter_by(day_of_week=day_of_week)
-        
-        timetables = query.order_by(Timetable.day_of_week, Timetable.time_slot).all()
-        
-        timetables_data = []
-        for timetable in timetables:
-            timetable_dict = timetable.to_dict()
-            if timetable.faculty:
-                timetable_dict['faculty_name'] = timetable.faculty.name
-            timetables_data.append(timetable_dict)
-        
-        return jsonify(timetables_data), 200
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+def get_db():
+    return db.session
 
-@timetables_bp.route('/timetables/<int:timetable_id>', methods=['GET'])
-def get_timetable(timetable_id):
-    try:
-        timetable = Timetable.query.get_or_404(timetable_id)
-        timetable_dict = timetable.to_dict()
-        if timetable.faculty:
-            timetable_dict['faculty_name'] = timetable.faculty.name
-        
-        return jsonify(timetable_dict), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+UPLOAD_FOLDER = 'src/static/uploads/timetables'
 
-@timetables_bp.route('/timetables', methods=['POST'])
-@login_required
+@timetables_bp.route("/timetables", methods=["POST"])
+# @login_required # Add your authentication decorator here
 def create_timetable():
-    try:
-        data = request.get_json()
-        
-        required_fields = ['program', 'semester', 'day_of_week', 'time_slot', 'subject']
-        for field in required_fields:
-            if not data.get(field):
-                return jsonify({'error': f'{field} is required'}), 400
-        
-        # Verify faculty exists if provided
-        if data.get('faculty_id'):
-            faculty = Faculty.query.get(data['faculty_id'])
-            if not faculty:
-                return jsonify({'error': 'Faculty not found'}), 404
-        
-        # Check for time slot conflicts
-        existing_timetable = Timetable.query.filter_by(
-            program=data['program'],
-            semester=data['semester'],
-            day_of_week=data['day_of_week'],
-            time_slot=data['time_slot'],
-            is_active=True
-        ).first()
-        
-        if existing_timetable:
-            return jsonify({'error': 'Time slot already occupied'}), 400
-        
-        timetable = Timetable(
-            program=data['program'],
-            semester=data['semester'],
-            day_of_week=data['day_of_week'],
-            time_slot=data['time_slot'],
-            subject=data['subject'],
-            faculty_id=data.get('faculty_id'),
-            room_no=data.get('room_no')
-        )
-        
-        db.session.add(timetable)
-        db.session.commit()
-        
-        return jsonify({
-            'message': 'Timetable created successfully',
-            'timetable': timetable.to_dict()
-        }), 201
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+    session = get_db()
+    title = request.form.get('title')
+    file = request.files.get('file')
 
-@timetables_bp.route('/timetables/<int:timetable_id>', methods=['PUT'])
-@login_required
-def update_timetable(timetable_id):
-    try:
-        timetable = Timetable.query.get_or_404(timetable_id)
-        data = request.get_json()
-        
-        # Update fields if provided
-        if 'subject' in data:
-            timetable.subject = data['subject']
-        if 'faculty_id' in data:
-            if data['faculty_id']:
-                faculty = Faculty.query.get(data['faculty_id'])
-                if not faculty:
-                    return jsonify({'error': 'Faculty not found'}), 404
-            timetable.faculty_id = data['faculty_id']
-        if 'room_no' in data:
-            timetable.room_no = data['room_no']
-        if 'is_active' in data:
-            timetable.is_active = data['is_active']
-        
-        # Check for time slot conflicts if time-related fields are updated
-        if any(field in data for field in ['day_of_week', 'time_slot', 'program', 'semester']):
-            new_day = data.get('day_of_week', timetable.day_of_week)
-            new_time = data.get('time_slot', timetable.time_slot)
-            new_program = data.get('program', timetable.program)
-            new_semester = data.get('semester', timetable.semester)
-            
-            existing_timetable = Timetable.query.filter(
-                Timetable.id != timetable_id,
-                Timetable.program == new_program,
-                Timetable.semester == new_semester,
-                Timetable.day_of_week == new_day,
-                Timetable.time_slot == new_time,
-                Timetable.is_active == True
-            ).first()
-            
-            if existing_timetable:
-                return jsonify({'error': 'Time slot already occupied'}), 400
-            
-            timetable.day_of_week = new_day
-            timetable.time_slot = new_time
-            timetable.program = new_program
-            timetable.semester = new_semester
-        
-        db.session.commit()
-        
-        return jsonify({
-            'message': 'Timetable updated successfully',
-            'timetable': timetable.to_dict()
-        }), 200
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+    if not title or not file:
+        return jsonify({"message": "Title and file are required"}), 400
 
-@timetables_bp.route('/timetables/<int:timetable_id>', methods=['DELETE'])
-@login_required
-def delete_timetable(timetable_id):
-    try:
-        timetable = Timetable.query.get_or_404(timetable_id)
-        db.session.delete(timetable)
-        db.session.commit()
-        
-        return jsonify({'message': 'Timetable deleted successfully'}), 200
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+    if file:
+        # Ensure the upload directory exists
+        upload_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
+        os.makedirs(upload_path, exist_ok=True)
 
-@timetables_bp.route('/timetables/weekly', methods=['GET'])
-def get_weekly_timetable():
-    try:
-        program = request.args.get('program')
-        semester = request.args.get('semester', type=int)
-        
-        if not program or not semester:
-            return jsonify({'error': 'Program and semester are required'}), 400
-        
-        timetables = Timetable.query.filter_by(
-            program=program,
-            semester=semester,
-            is_active=True
-        ).order_by(Timetable.day_of_week, Timetable.time_slot).all()
-        
-        # Organize by day of week
-        weekly_schedule = {
-            'Monday': [],
-            'Tuesday': [],
-            'Wednesday': [],
-            'Thursday': [],
-            'Friday': [],
-            'Saturday': []
-        }
-        
-        for timetable in timetables:
-            timetable_dict = timetable.to_dict()
-            if timetable.faculty:
-                timetable_dict['faculty_name'] = timetable.faculty.name
-            
-            if timetable.day_of_week in weekly_schedule:
-                weekly_schedule[timetable.day_of_week].append(timetable_dict)
-        
-        return jsonify({
-            'program': program,
-            'semester': semester,
-            'schedule': weekly_schedule
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
+        file_location = os.path.join(upload_path, filename)
+        file.save(file_location)
+        file_url = f"/static/uploads/timetables/{filename}"
+    else:
+        return jsonify({"message": "File not provided"}), 400
 
-@timetables_bp.route('/timetables/bulk-upload', methods=['POST'])
-@login_required
-def bulk_upload_timetables():
-    try:
-        data = request.get_json()
-        timetables_data = data.get('timetables', [])
-        
-        if not timetables_data:
-            return jsonify({'error': 'No timetables data provided'}), 400
-        
-        created_timetables = []
-        errors = []
-        
-        for i, timetable_data in enumerate(timetables_data):
-            try:
-                # Verify required fields
-                required_fields = ['program', 'semester', 'day_of_week', 'time_slot', 'subject']
-                for field in required_fields:
-                    if field not in timetable_data:
-                        errors.append(f'Row {i+1}: {field} is required')
-                        continue
-                
-                # Verify faculty exists if provided
-                if timetable_data.get('faculty_id'):
-                    faculty = Faculty.query.get(timetable_data['faculty_id'])
-                    if not faculty:
-                        errors.append(f'Row {i+1}: Faculty not found')
-                        continue
-                
-                # Check for time slot conflicts
-                existing_timetable = Timetable.query.filter_by(
-                    program=timetable_data['program'],
-                    semester=timetable_data['semester'],
-                    day_of_week=timetable_data['day_of_week'],
-                    time_slot=timetable_data['time_slot'],
-                    is_active=True
-                ).first()
-                
-                if existing_timetable:
-                    errors.append(f'Row {i+1}: Time slot already occupied')
-                    continue
-                
-                timetable = Timetable(
-                    program=timetable_data['program'],
-                    semester=timetable_data['semester'],
-                    day_of_week=timetable_data['day_of_week'],
-                    time_slot=timetable_data['time_slot'],
-                    subject=timetable_data['subject'],
-                    faculty_id=timetable_data.get('faculty_id'),
-                    room_no=timetable_data.get('room_no')
-                )
-                
-                db.session.add(timetable)
-                created_timetables.append(timetable)
-                
-            except Exception as e:
-                errors.append(f'Row {i+1}: {str(e)}')
-        
-        if errors:
-            db.session.rollback()
-            return jsonify({'errors': errors}), 400
-        
-        db.session.commit()
-        
-        return jsonify({
-            'message': f'{len(created_timetables)} timetables uploaded successfully',
-            'timetables': [timetable.to_dict() for timetable in created_timetables]
-        }), 201
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+    db_timetable = Timetable(title=title, file_url=file_url, uploaded_at=datetime.utcnow())
+    session.add(db_timetable)
+    session.commit()
+    session.refresh(db_timetable)
+    return jsonify({
+        "id": db_timetable.id,
+        "title": db_timetable.title,
+        "file_url": db_timetable.file_url,
+        "uploaded_at": db_timetable.uploaded_at.isoformat()
+    }), 201
 
+@timetables_bp.route("/timetables", methods=["GET"])
+def read_timetables():
+    session = get_db()
+    timetables = session.query(Timetable).order_by(Timetable.uploaded_at.desc()).all()
+    return jsonify([
+        {
+            "id": item.id,
+            "title": item.title,
+            "file_url": item.file_url,
+            "uploaded_at": item.uploaded_at.isoformat()
+        } for item in timetables
+    ])
+
+@timetables_bp.route("/timetables/<int:timetable_id>", methods=["GET"])
+def read_timetable(timetable_id: int):
+    session = get_db()
+    item = session.query(Timetable).filter(Timetable.id == timetable_id).first()
+    if item is None:
+        return jsonify({"message": "Timetable not found"}), 404
+    return jsonify({
+        "id": item.id,
+        "title": item.title,
+        "file_url": item.file_url,
+        "uploaded_at": item.uploaded_at.isoformat()
+    })
+
+@timetables_bp.route("/timetables/<int:timetable_id>", methods=["PUT"])
+def update_timetable(timetable_id: int):
+    session = get_db()
+    db_timetable = session.query(Timetable).filter(Timetable.id == timetable_id).first()
+    if db_timetable is None:
+        return jsonify({"message": "Timetable not found"}), 404
+    
+    title = request.form.get('title', db_timetable.title)
+    file = request.files.get('file')
+
+    db_timetable.title = title
+
+    if file:
+        # Delete old file if it exists
+        if db_timetable.file_url and os.path.exists(os.path.join(current_app.root_path, db_timetable.file_url.lstrip('/'))):
+            os.remove(os.path.join(current_app.root_path, db_timetable.file_url.lstrip('/')))
+
+        upload_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
+        os.makedirs(upload_path, exist_ok=True)
+        filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
+        file_location = os.path.join(upload_path, filename)
+        file.save(file_location)
+        db_timetable.file_url = f"/static/uploads/timetables/{filename}"
+
+    session.commit()
+    session.refresh(db_timetable)
+    return jsonify({
+        "id": db_timetable.id,
+        "title": db_timetable.title,
+        "file_url": db_timetable.file_url,
+        "uploaded_at": db_timetable.uploaded_at.isoformat()
+    })
+
+@timetables_bp.route("/timetables/<int:timetable_id>", methods=["DELETE"])
+def delete_timetable(timetable_id: int):
+    session = get_db()
+    db_timetable = session.query(Timetable).filter(Timetable.id == timetable_id).first()
+    if db_timetable is None:
+        return jsonify({"message": "Timetable not found"}), 404
+    
+    # Delete the file from the server
+    if db_timetable.file_url and os.path.exists(os.path.join(current_app.root_path, db_timetable.file_url.lstrip('/'))):
+        os.remove(os.path.join(current_app.root_path, db_timetable.file_url.lstrip('/')))
+
+    session.delete(db_timetable)
+    session.commit()
+    return jsonify({"message": "Timetable deleted successfully"}), 200

@@ -31,6 +31,7 @@ def create_timetable():
         filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
         file_location = os.path.join(upload_path, filename)
         file.save(file_location)
+        print(f"File saved to: {file_location}")
         file_url = f"https://college-backend-api.onrender.com/static/uploads/timetables/{filename}"
     else:
         return jsonify({"message": "File not provided"}), 400

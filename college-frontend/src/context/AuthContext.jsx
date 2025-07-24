@@ -12,13 +12,32 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Optionally, validate the token with the backend here
-      // For now, we'll just assume it's valid and set the admin state
-      setAdmin({ username: 'admin' }); // You might want to store more admin info in the token
-    }
-    setLoading(false);
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await fetch('https://college-backend-api.onrender.com/api/auth/check-auth', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          if (response.ok && data.authenticated) {
+            setAdmin(data.admin);
+          } else {
+            localStorage.removeItem('token'); // Clear invalid token
+            setAdmin(null);
+          }
+        } catch (err) {
+          console.error('Error checking auth status:', err);
+          localStorage.removeItem('token');
+          setAdmin(null);
+        }
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (username, password, callback) => {

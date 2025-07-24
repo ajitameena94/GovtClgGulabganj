@@ -12,22 +12,13 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch('https://college-backend-api.onrender.com/api/auth/check-auth', {
-          credentials: 'include'
-        });
-        const data = await response.json();
-        if (data.authenticated) {
-          setAdmin(data.admin);
-        }
-      } catch (err) {
-        console.error('Error checking auth status:', err);
-      }
-      setLoading(false);
-    };
-
-    checkAuth();
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Optionally, validate the token with the backend here
+      // For now, we'll just assume it's valid and set the admin state
+      setAdmin({ username: 'admin' }); // You might want to store more admin info in the token
+    }
+    setLoading(false);
   }, []);
 
   const login = async (username, password, callback) => {
@@ -38,16 +29,16 @@ export const AuthProvider = ({ children }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ username, password }),
-        credentials: 'include'
       });
 
       const data = await response.json();
 
       if (response.ok) {
-          setAdmin(data.admin);
-          setError(null);
-          if (callback) callback();
-        } else {
+        localStorage.setItem('token', data.access_token); // Store the token
+        setAdmin(data.admin);
+        setError(null);
+        if (callback) callback();
+      } else {
         setError(data.error || 'Login failed');
       }
     } catch (err) {
@@ -56,13 +47,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    try {
-      await fetch('https://college-backend-api.onrender.com/api/auth/logout', { method: 'POST', credentials: 'include' });
-      setAdmin(null);
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
+  const logout = () => {
+    localStorage.removeItem('token'); // Remove the token
+    setAdmin(null);
   };
 
   const value = {

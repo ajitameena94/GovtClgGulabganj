@@ -8,7 +8,15 @@ from flask import Flask, send_from_directory
 from flask_cors import CORS
 from src.models.user import db
 from src.models.college import Admin
+from src.routes.user import user_bp
+from src.routes.auth import auth_bp
+from src.routes.students import students_bp
+from src.routes.faculty import faculty_bp
+from src.routes.results import results_bp
+from src.routes.timetables import timetables_bp
 from src.routes.notifications import notifications_bp
+from src.routes.gallery import gallery_bp
+from src.routes.facilities import facilities_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
@@ -17,7 +25,15 @@ app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
 CORS(app, origins=["http://localhost:5173", "https://ajitameena94.github.io"], supports_credentials=True)
 
 # Register blueprints
+app.register_blueprint(user_bp, url_prefix='/api')
+app.register_blueprint(auth_bp, url_prefix='/api/auth')
+app.register_blueprint(students_bp, url_prefix='/api')
+app.register_blueprint(faculty_bp, url_prefix='/api')
+app.register_blueprint(results_bp, url_prefix='/api')
+app.register_blueprint(timetables_bp, url_prefix='/api')
 app.register_blueprint(notifications_bp, url_prefix='/api')
+app.register_blueprint(gallery_bp, url_prefix='/api')
+app.register_blueprint(facilities_bp, url_prefix='/api')
 
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://college_db_aib3_user:lNs5Olyvg9o7RmQM1vGJ9lpQvNak4B4o@dpg-d20rk7mmcj7s73e38g40-a/college_db_aib3')

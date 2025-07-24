@@ -9,11 +9,12 @@ const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login, error } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     await login(username, password, () => {
-      // No direct navigation here, AuthContext handles it
+      navigate('/admin/upload-facilities');
     });
   };
 

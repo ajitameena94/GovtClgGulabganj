@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/auth/check-auth', {
+        const response = await fetch('https://college-backend-api.onrender.com/api/auth/check-auth', {
           credentials: 'include'
         });
         const data = await response.json();

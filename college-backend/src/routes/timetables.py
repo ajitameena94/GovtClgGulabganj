@@ -31,7 +31,7 @@ def create_timetable():
         filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
         file_location = os.path.join(upload_path, filename)
         file.save(file_location)
-        file_url = f"/static/uploads/timetables/{filename}"
+        file_url = f"https://college-backend-api.onrender.com/static/uploads/timetables/{filename}"
     else:
         return jsonify({"message": "File not provided"}), 400
 
@@ -94,7 +94,7 @@ def update_timetable(timetable_id: int):
         filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
         file_location = os.path.join(upload_path, filename)
         file.save(file_location)
-        db_timetable.file_url = f"/static/uploads/timetables/{filename}"
+        db_timetable.file_url = f"https://college-backend-api.onrender.com/static/uploads/timetables/{filename}"
 
     session.commit()
     session.refresh(db_timetable)

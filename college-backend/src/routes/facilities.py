@@ -32,7 +32,7 @@ def create_facility():
         filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
         file_location = os.path.join(upload_path, filename)
         file.save(file_location)
-        image_url = f"/static/uploads/facilities/{filename}"
+        image_url = f"https://college-backend-api.onrender.com/static/uploads/facilities/{filename}"
     else:
         return jsonify({"message": "File not provided"}), 400
 
@@ -100,7 +100,7 @@ def update_facility(facility_id: int):
         filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
         file_location = os.path.join(upload_path, filename)
         file.save(file_location)
-        db_facility.image_url = f"/static/uploads/facilities/{filename}"
+        db_facility.image_url = f"https://college-backend-api.onrender.com/static/uploads/facilities/{filename}"
 
     session.commit()
     session.refresh(db_facility)

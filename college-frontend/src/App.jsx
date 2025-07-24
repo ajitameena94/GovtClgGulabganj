@@ -24,7 +24,7 @@ const StudentPortal = () => <div className="min-h-screen py-20 px-4"><div classN
 
 function App() {
   return (
-    <Router>
+    <Router basename="/GovtClgGulabganj">
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1">

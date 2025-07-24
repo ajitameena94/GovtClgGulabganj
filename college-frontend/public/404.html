@@ -4,11 +4,8 @@
     <meta charset="utf-8">
     <title>Redirecting...</title>
     <script>
-      // Get the base path from the current URL
-      var path = window.location.pathname;
-      var base = path.substring(0, path.lastIndexOf('/GovtClgGulabganj/') + '/GovtClgGulabganj/'.length);
-      // Redirect to the base path, letting React Router handle the rest
-      window.location.replace(base + window.location.hash.substring(1));
+      // Redirect to the base URL of your GitHub Pages site
+      window.location.replace('/GovtClgGulabganj/');
     </script>
   </head>
   <body>

@@ -32,9 +32,12 @@ export const AuthProvider = ({ children }) => {
           console.error('Error checking auth status:', err);
           localStorage.removeItem('token');
           setAdmin(null);
+        } finally {
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuth();

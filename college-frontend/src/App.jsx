@@ -10,7 +10,6 @@ import UploadGallery from './pages/UploadGallery';
 import ManageLibrary from './pages/ManageLibrary';
 import ManageNotifications from './pages/ManageNotifications';
 import ManageTimetables from './pages/ManageTimetables';
-import ManageGallery from './pages/ManageGallery';
 import ManageFacilities from './pages/ManageFacilities';
 import ProtectedRoute from './components/ProtectedRoute';
 import About from './pages/About';
@@ -87,14 +86,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ManageTimetables />
-                </ProtectedRoute>
-              }
-            />
-            <Route 
-              path="/admin/manage-gallery"
-              element={
-                <ProtectedRoute>
-                  <ManageGallery />
                 </ProtectedRoute>
               }
             />

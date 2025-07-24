@@ -19,8 +19,8 @@ const AdminDashboard = () => {
       link: '/admin/manage-timetables',
     },
     {
-      title: 'Manage Gallery',
-      description: 'View, edit, and delete campus gallery images.',
+      title: 'Upload Gallery',
+      description: 'Upload, view, edit, and delete campus gallery images.',
       icon: Image,
       link: '/admin/upload/gallery',
     },

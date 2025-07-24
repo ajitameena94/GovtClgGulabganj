@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (username, password, callback) => {
     try {
       const response = await fetch('https://college-backend-api.onrender.com/api/auth/login', {
         method: 'POST',

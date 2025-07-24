@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await fetch('YOUR_RENDER_BACKEND_URL/api/auth/logout', { method: 'POST', credentials: 'include' });
+      await fetch('https://college-backend-api.onrender.com/api/auth/logout', { method: 'POST', credentials: 'include' });
       setAdmin(null);
     } catch (err) {
       console.error('Logout error:', err);

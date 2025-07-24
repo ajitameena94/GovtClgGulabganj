@@ -7,6 +7,9 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import UploadFacilities from './pages/UploadFacilities';
 import UploadGallery from './pages/UploadGallery';
+import ManageLibrary from './pages/ManageLibrary';
+import ManageNotifications from './pages/ManageNotifications';
+import ManageTimetables from './pages/ManageTimetables';
 import ProtectedRoute from './components/ProtectedRoute';
 import About from './pages/About';
 import Academics from './pages/Academics';
@@ -58,6 +61,30 @@ function App() {
               element={
                 <ProtectedRoute>
                   <UploadGallery />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/admin/manage-library"
+              element={
+                <ProtectedRoute>
+                  <ManageLibrary />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/admin/manage-notifications"
+              element={
+                <ProtectedRoute>
+                  <ManageNotifications />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/admin/manage-timetables"
+              element={
+                <ProtectedRoute>
+                  <ManageTimetables />
                 </ProtectedRoute>
               }
             />

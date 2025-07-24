@@ -57,7 +57,7 @@ def read_gallery_items():
             "id": item.id,
             "title": item.title,
             "category": item.category,
-            "image_url": item.image_url,
+            "image_url": f"https://college-backend-api.onrender.com{item.image_url}",
             "uploaded_at": item.uploaded_at.isoformat()
         } for item in gallery_items
     ])

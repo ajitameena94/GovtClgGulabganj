@@ -57,7 +57,7 @@ def read_facilities():
             "id": facility.id,
             "name": facility.name,
             "description": facility.description,
-            "image_url": facility.image_url,
+            "image_url": f"https://college-backend-api.onrender.com{facility.image_url}",
             "uploaded_at": facility.uploaded_at.isoformat()
         } for facility in facilities
     ])

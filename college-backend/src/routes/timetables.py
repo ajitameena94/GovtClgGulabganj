@@ -54,7 +54,7 @@ def read_timetables():
         {
             "id": item.id,
             "title": item.title,
-            "file_url": item.file_url,
+            "file_url": f"https://college-backend-api.onrender.com{item.file_url}",
             "uploaded_at": item.uploaded_at.isoformat()
         } for item in timetables
     ])

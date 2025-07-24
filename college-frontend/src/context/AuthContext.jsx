@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
           setAdmin(data.admin);
           setError(null);
-          navigate('/admin/upload-facilities');
+          if (callback) callback();
         } else {
         setError(data.error || 'Login failed');
       }

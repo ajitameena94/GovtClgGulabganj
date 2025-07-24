@@ -25,10 +25,10 @@ const AdminDashboard = () => {
       link: '/admin/manage-timetables',
     },
     {
-      title: 'Upload Facilities',
-      description: 'Upload and manage college facilities.',
+      title: 'Manage Facilities',
+      description: 'Upload, edit, and delete college facilities.',
       icon: Upload,
-      link: '/admin/upload-facilities',
+      link: '/admin/manage-facilities',
     },
     {
       title: 'Upload Gallery',

@@ -11,6 +11,7 @@ import ManageLibrary from './pages/ManageLibrary';
 import ManageNotifications from './pages/ManageNotifications';
 import ManageTimetables from './pages/ManageTimetables';
 import ManageGallery from './pages/ManageGallery';
+import ManageFacilities from './pages/ManageFacilities';
 import ProtectedRoute from './components/ProtectedRoute';
 import About from './pages/About';
 import Academics from './pages/Academics';
@@ -94,6 +95,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ManageGallery />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/admin/manage-facilities"
+              element={
+                <ProtectedRoute>
+                  <ManageFacilities />
                 </ProtectedRoute>
               }
             />

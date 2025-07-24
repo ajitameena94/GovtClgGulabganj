@@ -16,6 +16,7 @@ from src.routes.results import results_bp
 from src.routes.timetables import timetables_bp
 from src.routes.notifications import notifications_bp
 from src.routes.gallery import gallery_bp
+from src.routes.facilities import facilities_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
@@ -32,6 +33,7 @@ app.register_blueprint(results_bp, url_prefix='/api')
 app.register_blueprint(timetables_bp, url_prefix='/api')
 app.register_blueprint(notifications_bp, url_prefix='/api')
 app.register_blueprint(gallery_bp, url_prefix='/api')
+app.register_blueprint(facilities_bp, url_prefix='/api')
 
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://college_db_aib3_user:lNs5Olyvg9o7RmQM1vGJ9lpQvNak4B4o@dpg-d20rk7mmcj7s73e38g40-a/college_db_aib3')

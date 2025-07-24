@@ -1,10 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
+from src.models.user import db
 
-Base = declarative_base()
-
-class Notification(Base):
+class Notification(db.Model):
     __tablename__ = "notifications"
 
     id = Column(Integer, primary_key=True, index=True)

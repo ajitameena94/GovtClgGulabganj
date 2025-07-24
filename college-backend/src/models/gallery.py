@@ -1,10 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
+from src.models.user import db
 
-Base = declarative_base()
-
-class GalleryItem(Base):
+class GalleryItem(db.Model):
     __tablename__ = "gallery_items"
 
     id = Column(Integer, primary_key=True, index=True)

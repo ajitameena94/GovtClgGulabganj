@@ -35,7 +35,7 @@ def login():
     admin = Admin.query.filter_by(username=username).first()
     
     if admin and admin.check_password(password):
-        access_token = create_access_token(identity=admin.id)
+        access_token = create_access_token(identity=str(admin.id))
         return jsonify({
             'message': 'Login successful',
             'access_token': access_token,

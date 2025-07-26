@@ -5,3 +5,4 @@ Flask-Cors
 psycopg2-binary
 python-dotenv
 boto3
+gunicorn

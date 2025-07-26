@@ -24,6 +24,12 @@ const AdminDashboard = () => {
       icon: Image,
       link: '/admin/upload/gallery',
     },
+    {
+      title: 'Manage Results',
+      description: 'Upload and manage academic results.',
+      icon: Book,
+      link: '/admin/manage-results',
+    },
   ];
 
   return (

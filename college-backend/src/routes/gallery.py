@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, current_app
 from datetime import datetime
 import os
 import uuid
+import boto3
+from botocore.exceptions import NoCredentialsError
 
 from ..models.gallery import GalleryItem
 from ..models.user import db
@@ -11,7 +13,18 @@ gallery_bp = Blueprint('gallery', __name__)
 def get_db():
     return db.session
 
-UPLOAD_FOLDER = 'src/static/uploads/gallery'
+# S3 Configuration
+S3_BUCKET = os.environ.get('S3_BUCKET_NAME')
+S3_KEY = os.environ.get('AWS_ACCESS_KEY_ID')
+S3_SECRET = os.environ.get('AWS_SECRET_ACCESS_KEY')
+S3_REGION = os.environ.get('S3_REGION')
+
+s3 = boto3.client(
+    's3',
+    aws_access_key_id=S3_KEY,
+    aws_secret_access_key=S3_SECRET,
+    region_name=S3_REGION
+)
 
 @gallery_bp.route("/gallery", methods=["POST"])
 # @login_required # Add your authentication decorator here
@@ -25,15 +38,17 @@ def create_gallery_item():
         return jsonify({"message": "Title, category, and file are required"}), 400
 
     if file:
-        # Ensure the upload directory exists
-        upload_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
-        os.makedirs(upload_path, exist_ok=True)
-
         filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
-        file_location = os.path.join(upload_path, filename)
-        file.save(file_location)
-        print(f"File saved to: {file_location}")
-        image_url = f"https://college-backend-api.onrender.com/static/uploads/gallery/{filename}"
+        s3_file_path = f"uploads/gallery/{filename}"
+        
+        try:
+            s3.upload_fileobj(file, S3_BUCKET, s3_file_path,
+                              ExtraArgs={'ContentType': file.content_type})
+            image_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{s3_file_path}"
+        except NoCredentialsError:
+            return jsonify({"message": "Credentials not available"}), 500
+        except Exception as e:
+            return jsonify({"message": f"Error uploading file to S3: {str(e)}"}), 500
     else:
         return jsonify({"message": "File not provided"}), 400
 
@@ -58,7 +73,7 @@ def read_gallery_items():
             "id": item.id,
             "title": item.title,
             "category": item.category,
-            "image_url": item.image_url if item.image_url.startswith("http") else f"https://college-backend-api.onrender.com{item.image_url}",
+            "image_url": item.image_url,
             "uploaded_at": item.uploaded_at.isoformat()
         } for item in gallery_items
     ])
@@ -92,16 +107,25 @@ def update_gallery_item(gallery_item_id: int):
     db_gallery_item.category = category
 
     if file:
-        # Delete old file if it exists
-        if db_gallery_item.image_url and os.path.exists(os.path.join(current_app.root_path, db_gallery_item.image_url.lstrip('/'))):
-            os.remove(os.path.join(current_app.root_path, db_gallery_item.image_url.lstrip('/')))
+        # Delete old file from S3 if it exists
+        if db_gallery_item.image_url:
+            old_filename = db_gallery_item.image_url.split('/')[-1]
+            old_s3_file_path = f"uploads/gallery/{old_filename}"
+            try:
+                s3.delete_object(Bucket=S3_BUCKET, Key=old_s3_file_path)
+            except Exception as e:
+                print(f"Error deleting old file from S3: {str(e)}")
 
-        upload_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
-        os.makedirs(upload_path, exist_ok=True)
         filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
-        file_location = os.path.join(upload_path, filename)
-        file.save(file_location)
-        db_gallery_item.image_url = f"https://college-backend-api.onrender.com/static/uploads/gallery/{filename}"
+        s3_file_path = f"uploads/gallery/{filename}"
+        try:
+            s3.upload_fileobj(file, S3_BUCKET, s3_file_path,
+                              ExtraArgs={'ContentType': file.content_type})
+            db_gallery_item.image_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{s3_file_path}"
+        except NoCredentialsError:
+            return jsonify({"message": "Credentials not available"}), 500
+        except Exception as e:
+            return jsonify({"message": f"Error uploading new file to S3: {str(e)}"}), 500
 
     session.commit()
     session.refresh(db_gallery_item)
@@ -120,9 +144,14 @@ def delete_gallery_item(gallery_item_id: int):
     if db_gallery_item is None:
         return jsonify({"message": "Gallery item not found"}), 404
     
-    # Delete the file from the server
-    if db_gallery_item.image_url and os.path.exists(os.path.join(current_app.root_path, db_gallery_item.image_url.lstrip('/'))):
-        os.remove(os.path.join(current_app.root_path, db_gallery_item.image_url.lstrip('/')))
+    # Delete the file from S3
+    if db_gallery_item.image_url:
+        filename = db_gallery_item.image_url.split('/')[-1]
+        s3_file_path = f"uploads/gallery/{filename}"
+        try:
+            s3.delete_object(Bucket=S3_BUCKET, Key=s3_file_path)
+        except Exception as e:
+            print(f"Error deleting file from S3: {str(e)}")
 
     session.delete(db_gallery_item)
     session.commit()

@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, current_app
 from datetime import datetime
 import os
 import uuid
+import boto3
+from botocore.exceptions import NoCredentialsError
 
 from ..models.timetable import Timetable
 from ..models.user import db
@@ -11,7 +13,18 @@ timetables_bp = Blueprint('timetables', __name__)
 def get_db():
     return db.session
 
-UPLOAD_FOLDER = 'src/static/uploads/timetables'
+# S3 Configuration
+S3_BUCKET = os.environ.get('S3_BUCKET_NAME')
+S3_KEY = os.environ.get('AWS_ACCESS_KEY_ID')
+S3_SECRET = os.environ.get('AWS_SECRET_ACCESS_KEY')
+S3_REGION = os.environ.get('S3_REGION')
+
+s3 = boto3.client(
+    's3',
+    aws_access_key_id=S3_KEY,
+    aws_secret_access_key=S3_SECRET,
+    region_name=S3_REGION
+)
 
 @timetables_bp.route("/timetables", methods=["POST"])
 # @login_required # Add your authentication decorator here
@@ -24,15 +37,17 @@ def create_timetable():
         return jsonify({"message": "Title and file are required"}), 400
 
     if file:
-        # Ensure the upload directory exists
-        upload_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
-        os.makedirs(upload_path, exist_ok=True)
-
         filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
-        file_location = os.path.join(upload_path, filename)
-        file.save(file_location)
-        print(f"File saved to: {file_location}")
-        file_url = f"https://college-backend-api.onrender.com/static/uploads/timetables/{filename}"
+        s3_file_path = f"uploads/timetables/{filename}"
+        
+        try:
+            s3.upload_fileobj(file, S3_BUCKET, s3_file_path,
+                              ExtraArgs={'ContentType': file.content_type})
+            file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{s3_file_path}"
+        except NoCredentialsError:
+            return jsonify({"message": "Credentials not available"}), 500
+        except Exception as e:
+            return jsonify({"message": f"Error uploading file to S3: {str(e)}"}), 500
     else:
         return jsonify({"message": "File not provided"}), 400
 
@@ -55,7 +70,7 @@ def read_timetables():
         {
             "id": item.id,
             "title": item.title,
-            "file_url": item.file_url if item.file_url.startswith("http") else f"https://college-backend-api.onrender.com{item.file_url}",
+            "file_url": item.file_url,
             "uploaded_at": item.uploaded_at.isoformat()
         } for item in timetables
     ])
@@ -86,16 +101,25 @@ def update_timetable(timetable_id: int):
     db_timetable.title = title
 
     if file:
-        # Delete old file if it exists
-        if db_timetable.file_url and os.path.exists(os.path.join(current_app.root_path, db_timetable.file_url.lstrip('/'))):
-            os.remove(os.path.join(current_app.root_path, db_timetable.file_url.lstrip('/')))
+        # Delete old file from S3 if it exists
+        if db_timetable.file_url:
+            old_filename = db_timetable.file_url.split('/')[-1]
+            old_s3_file_path = f"uploads/timetables/{old_filename}"
+            try:
+                s3.delete_object(Bucket=S3_BUCKET, Key=old_s3_file_path)
+            except Exception as e:
+                print(f"Error deleting old file from S3: {str(e)}")
 
-        upload_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
-        os.makedirs(upload_path, exist_ok=True)
         filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
-        file_location = os.path.join(upload_path, filename)
-        file.save(file_location)
-        db_timetable.file_url = f"https://college-backend-api.onrender.com/static/uploads/timetables/{filename}"
+        s3_file_path = f"uploads/timetables/{filename}"
+        try:
+            s3.upload_fileobj(file, S3_BUCKET, s3_file_path,
+                              ExtraArgs={'ContentType': file.content_type})
+            db_timetable.file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{s3_file_path}"
+        except NoCredentialsError:
+            return jsonify({"message": "Credentials not available"}), 500
+        except Exception as e:
+            return jsonify({"message": f"Error uploading new file to S3: {str(e)}"}), 500
 
     session.commit()
     session.refresh(db_timetable)
@@ -113,9 +137,14 @@ def delete_timetable(timetable_id: int):
     if db_timetable is None:
         return jsonify({"message": "Timetable not found"}), 404
     
-    # Delete the file from the server
-    if db_timetable.file_url and os.path.exists(os.path.join(current_app.root_path, db_timetable.file_url.lstrip('/'))):
-        os.remove(os.path.join(current_app.root_path, db_timetable.file_url.lstrip('/')))
+    # Delete the file from S3
+    if db_timetable.file_url:
+        filename = db_timetable.file_url.split('/')[-1]
+        s3_file_path = f"uploads/timetables/{filename}"
+        try:
+            s3.delete_object(Bucket=S3_BUCKET, Key=s3_file_path)
+        except Exception as e:
+            print(f"Error deleting file from S3: {str(e)}")
 
     session.delete(db_timetable)
     session.commit()

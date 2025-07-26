@@ -41,7 +41,7 @@ app.register_blueprint(facilities_bp, url_prefix='/api')
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://college_db_aib3_user:lNs5Olyvg9o7RmQM1vGJ9lpQvNak4B4o@dpg-d20rk7mmcj7s73e38g40-a/college_db_aib3')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
 
 db.init_app(app)
 with app.app_context():
